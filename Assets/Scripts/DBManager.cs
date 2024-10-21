@@ -12,8 +12,11 @@ public class DBManager : MonoBehaviour
 {
     public static DBManager Instance { get; private set; }
     private string dbUri = "URI=file:mydb.sqlite";
-    private string SQL_COUNT_ELEMNTS = "SELECT count(*) FROM Posiciones;";
-    private string SQL_CREATE_POSICIONES = "CREATE TABLE ...";
+    public string SQL_COUNT_ELEMENTS = "SELECT count(*) FROM Posiciones;";
+    public string SQL_CREATE_POSICIONES = "CREATE TABLE IF NOT EXIST Posiciones (PlayerID INTEGER UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, timestamp FLOAT NOT NULL, position FLOAT REFERENCES Coordenadas); ";
+    public string SQL_CREATE_COORDENADAS = "CREATE TABLE IF NOT EXIST Coordenadas (ID INTEGER UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT, x FLOAT NOT NULL, y FLOAT NOT NULL, z FLOAT NOT NULL); "; 
+    public string SQL_CREATE_NOMBRESUNIT= "CREATE TABLE IF NOT EXIST NombresUnidad (PlayerID INTEGER UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, timestamp FLOAT NOT NULL); ";
+
 
     private IDbConnection dbConnection;
 
@@ -49,9 +52,16 @@ public class DBManager : MonoBehaviour
         dbCmd.ExecuteReader();
     }
 
-    public void SavePosition(CharacterPosition position)
+    private void newInitializeDB()
     {
-        string command = "INSERT INTO ...";
+        IDbCommand dbCmd = dbConnection.CreateCommand();
+        dbCmd.CommandText = SQL_CREATE_NOMBRESUNIT;
+        dbCmd.ExecuteReader();
+    }
+
+    public void SavePosition(string name, float timestamp, CharacterPosition position)
+    {
+        string command = "INSERT INTO Posiciones (name, timestamp, position) VALUES ('{name}','{timestamp}', '{position}');";
         IDbCommand dbCommand = dbConnection.CreateCommand();
         dbCommand.CommandText = command;
         dbCommand.ExecuteNonQuery();
